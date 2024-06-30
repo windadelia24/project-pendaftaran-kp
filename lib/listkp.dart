@@ -6,11 +6,11 @@ import 'package:myapp/ajukantempat.dart';
 import 'package:myapp/daftarkp.dart';
 import 'package:myapp/editkp.dart';
 import 'package:myapp/listtawaran.dart';
-import 'package:myapp/models/internship.dart'; // Ensure this path is correct
+import 'package:myapp/models/internship.dart';
 import 'package:myapp/navbar.dart';
 
 class ListKp extends StatefulWidget {
-  const ListKp({super.key});
+  const ListKp({Key? key}) : super(key: key);
 
   @override
   _ListKpState createState() => _ListKpState();
@@ -124,7 +124,7 @@ class CustomList extends StatelessWidget {
   final Map<String, dynamic> profile;
   final List<InternshipElement> internships;
 
-  const CustomList({super.key, required this.profile, required this.internships});
+  const CustomList({Key? key, required this.profile, required this.internships}) : super(key: key);
 
   String _formatDate(DateTime? date) {
     if (date == null) return "N/A";
@@ -216,7 +216,7 @@ class CustomList extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const EditKp())); 
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EditKp(internshipId: internship.id))); // Navigates to EditKp with internshipId
             },
             child: Container(
               decoration: BoxDecoration(
