@@ -45,6 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setInt('expires_at', login.expiresAt);
       await prefs.setString('user_profile', json.encode(profile));
 
+      // Save student_id to SharedPreferences
+      await prefs.setString('student_id', profile['id'].toString());
+
       // Navigate to dashboard screen on successful login
       showDialog(
         // ignore: use_build_context_synchronously

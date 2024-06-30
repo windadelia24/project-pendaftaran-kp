@@ -109,7 +109,28 @@ class _DaftarKpState extends State<DaftarKp> {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print('Proposal submitted: ${data['message']}');
+        String message = data['message'];
+
+        // Show popup with message
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Success'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ListKp()),
+                  );
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
       } else {
         print('Failed to submit proposal');
       }
@@ -244,9 +265,8 @@ class _DaftarKpState extends State<DaftarKp> {
                           TextFormField(
                             controller: startDateController,
                             decoration: const InputDecoration(
-                              hintText: 'Masukkan tanggal mulai (dd-MM-yyyy)',
+                              hintText: 'Ex: 01-01-2024',
                               border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.calendar_today),
                             ),
                             keyboardType: TextInputType.datetime,
                           ),
@@ -265,9 +285,8 @@ class _DaftarKpState extends State<DaftarKp> {
                           TextFormField(
                             controller: endDateController,
                             decoration: const InputDecoration(
-                              hintText: 'Masukkan tanggal selesai (dd-MM-yyyy)',
+                              hintText: 'Ex: 01-02-2024',
                               border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.calendar_today),
                             ),
                             keyboardType: TextInputType.datetime,
                           ),
