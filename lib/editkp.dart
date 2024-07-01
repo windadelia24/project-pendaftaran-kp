@@ -38,6 +38,7 @@ class _CustomEditState extends State<CustomEdit> {
   List<Student> students = [];
   List<CompanyData> companies = [];
   String? selectedCompany;
+  String? id_proposal;
   List<String> selectedStudents = [];
   final titleController = TextEditingController();
   final jobDescController = TextEditingController();
@@ -69,7 +70,7 @@ class _CustomEditState extends State<CustomEdit> {
           startDateController.text = DateFormat('dd-MM-yyyy').format(internshipDetail?.proposal.startAt ?? DateTime.now());
           endDateController.text = DateFormat('dd-MM-yyyy').format(internshipDetail?.proposal.endAt ?? DateTime.now());
           selectedCompany = internshipDetail?.proposal.company.id;
-          // Assuming you need to preselect students, handle that logic here
+          id_proposal = internshipDetail?.proposal.id;
         });
       } else {
         print('Failed to load internship details');
@@ -120,7 +121,7 @@ class _CustomEditState extends State<CustomEdit> {
     String? token = prefs.getString('login_token');
     String? loggedInStudentId = prefs.getString('student_id'); // Assume you save this when logging in
     
-    if (token != null && selectedCompany != null) {
+    if (token != null && selectedCompany != null && id_proposal != null) {
       if (loggedInStudentId != null && !selectedStudents.contains(loggedInStudentId)) {
         selectedStudents.add(loggedInStudentId);
       }
@@ -136,7 +137,7 @@ class _CustomEditState extends State<CustomEdit> {
       }
 
       final response = await http.put(
-        Uri.parse('https://backend-pmp.unand.dev/api/my-internships/${widget.internshipId}'),
+        Uri.parse('https://backend-pmp.unand.dev/api/my-internship-proposals/${id_proposal}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -297,6 +298,41 @@ class _CustomEditState extends State<CustomEdit> {
                 ],
               ),
               const SizedBox(height: 20),
+              const Text(
+                'Teman',
+                style: TextStyle(fontSize: 16),
+              ),
+              ...List.generate(
+                3,
+                (index) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: DropdownButtonFormField<String>(
+                    items: students.map((student) {
+                      return DropdownMenuItem(
+                        value: student.id,
+                        child: Text(student.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value != null) {
+                          if (selectedStudents.length > index) {
+                            selectedStudents[index] = value;
+                          } else {
+                            selectedStudents.add(value);
+                          }
+                        }
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    value: selectedStudents.length > index ? selectedStudents[index] : null,
+                    hint: Text('Pilih Teman ${index + 1}'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   submitProposal();
@@ -304,7 +340,7 @@ class _CustomEditState extends State<CustomEdit> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5B9EE1),
                 ),
-                child: const Text('Simpan Perubahan', style: TextStyle(color: Colors.white)),
+                child: const Text('Simpan', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
