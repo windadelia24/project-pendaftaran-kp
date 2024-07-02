@@ -119,7 +119,7 @@ class _CustomEditState extends State<CustomEdit> {
   Future<void> submitProposal() async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('login_token');
-    String? loggedInStudentId = prefs.getString('student_id'); // Assume you save this when logging in
+    String? loggedInStudentId = prefs.getString('student_id');
     
     if (token != null && selectedCompany != null && id_proposal != null) {
       if (loggedInStudentId != null && !selectedStudents.contains(loggedInStudentId)) {
@@ -146,8 +146,8 @@ class _CustomEditState extends State<CustomEdit> {
           'company_id': selectedCompany,
           'title': titleController.text,
           'job_desc': jobDescController.text,
-          'start_at': formatStartDate(startDateController.text), // Format "yyyy-MM-dd"
-          'end_at': formatEndDate(endDateController.text),     // Format "yyyy-MM-dd"
+          'start_at': formatStartDate(startDateController.text), 
+          'end_at': formatEndDate(endDateController.text),     
           'students': selectedStudents,
         }),
       );
@@ -155,7 +155,6 @@ class _CustomEditState extends State<CustomEdit> {
         final data = jsonDecode(response.body);
         String message = data['message'];
 
-        // Show popup with message
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -164,7 +163,7 @@ class _CustomEditState extends State<CustomEdit> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); 
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const ListKp()),
@@ -310,7 +309,10 @@ class _CustomEditState extends State<CustomEdit> {
                     items: students.map((student) {
                       return DropdownMenuItem(
                         value: student.id,
-                        child: Text(student.name),
+                        child: Text(
+                          student.name,
+                          style: TextStyle(fontSize: 14), // Ubah ukuran teks sesuai kebutuhan
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {

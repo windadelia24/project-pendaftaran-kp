@@ -23,7 +23,7 @@ class Repository {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       var login = Login.fromJson(data);
-      await _saveToken(login.token); // Access the token directly
+      await _saveToken(login.token);
       return login;
     } else {
       final data = json.decode(response.body);

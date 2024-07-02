@@ -92,7 +92,6 @@ class _CustomAjukanState extends State<CustomAjukan> {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      // Berhasil mengirim data
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Berhasil mengajukan tempat KP')),
       );
@@ -101,7 +100,6 @@ class _CustomAjukanState extends State<CustomAjukan> {
         MaterialPageRoute(builder: (context) => const ListKp()),
       );
     } else {
-      // Gagal mengirim data
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal mengajukan tempat KP: ${response.body}')),
       );

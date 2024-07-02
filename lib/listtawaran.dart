@@ -6,7 +6,7 @@ import 'package:myapp/ajukantempat.dart';
 import 'package:myapp/daftarkp.dart';
 import 'package:myapp/listkp.dart';
 import 'package:myapp/navbar.dart';
-import 'package:myapp/models/openinternship.dart';  // Pastikan path ini benar
+import 'package:myapp/models/openinternship.dart';
 
 class ListTawaran extends StatefulWidget {
   const ListTawaran({super.key});
@@ -147,7 +147,6 @@ class CustomTawaran extends StatelessWidget {
                 subtitle: Text(proposal.jobDesc),
                 trailing: Text('${_formatDate(proposal.startAt)} - ${_formatDate(proposal.endAt)}'),
                 onTap: () {
-                  // Aksi ketika ListTile diklik
                 },
               ),
             ),

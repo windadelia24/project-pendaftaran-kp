@@ -58,7 +58,6 @@ class _ListKpState extends State<ListKp> {
           isLoading = false;
         });
       } else {
-        // Handle API error
         print('Failed to load internships');
         setState(() {
           isLoading = false;
@@ -216,7 +215,7 @@ class CustomList extends StatelessWidget {
           padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
           child: GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => EditKp(internshipId: internship.id))); // Navigates to EditKp with internshipId
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EditKp(internshipId: internship.id)));
             },
             child: Container(
               decoration: BoxDecoration(

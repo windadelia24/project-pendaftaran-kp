@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:myapp/listkp.dart';
-import 'package:myapp/models/login.dart'; // Ensure this path is correct
+import 'package:myapp/models/login.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,24 +38,21 @@ class _LoginScreenState extends State<LoginScreen> {
       final profile = jsonResponse['data']['profile'];
       Login login = Login.fromJson(authorization);
 
-      // Save token and profile to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('login_token', login.token);
       await prefs.setString('token_type', login.type);
       await prefs.setInt('expires_at', login.expiresAt);
       await prefs.setString('user_profile', json.encode(profile));
 
-      // Save student_id to SharedPreferences
       await prefs.setString('student_id', profile['id'].toString());
 
-      // Navigate to dashboard screen on successful login
       showDialog(
         // ignore: use_build_context_synchronously
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Login Berhasil'),
-            content: Text('Token: ${login.token}\nType: ${login.type}'),
+            content: Text('Selamat datang, ${profile['name']}!'),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
@@ -72,7 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
         },
       );
     } else {
-      // Failed login
       showDialog(
         // ignore: use_build_context_synchronously
         context: context,
@@ -148,7 +144,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // Handle sign up action here
                     },
                     child: const Text(
                       'Sign Up',
