@@ -7,7 +7,9 @@ import 'package:myapp/daftarkp.dart';
 import 'package:myapp/editkp.dart';
 import 'package:myapp/listtawaran.dart';
 import 'package:myapp/models/internship.dart';
+import 'package:myapp/models/gempa.dart';
 import 'package:myapp/navbar.dart';
+import 'package:intl/intl.dart';
 
 class ListKp extends StatefulWidget {
   const ListKp({Key? key}) : super(key: key);
@@ -19,6 +21,7 @@ class ListKp extends StatefulWidget {
 class _ListKpState extends State<ListKp> {
   Map<String, dynamic>? profile;
   List<InternshipElement> internships = [];
+  List<GempaTerkini> earthquakes = [];
   bool isLoading = true;
 
   @override
@@ -26,6 +29,7 @@ class _ListKpState extends State<ListKp> {
     super.initState();
     _loadProfile();
     _loadInternships();
+    _loadEarthquakes();
   }
 
   Future<void> _loadProfile() async {
@@ -38,6 +42,32 @@ class _ListKpState extends State<ListKp> {
     }
   }
 
+  Future<void> _loadEarthquakes() async {
+    final url = Uri.parse(
+        'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime&limit=1');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      GempaTerkini earthquakeData = GempaTerkini.fromJson(jsonResponse);
+      setState(() {
+        earthquakes = [earthquakeData];
+        isLoading = false;
+      });
+    } else {
+      print('Failed to load earthquakes');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  String _formatDate(int epochTime) {
+    var date = DateTime.fromMillisecondsSinceEpoch(epochTime);
+    var formatter = DateFormat('dd MMMM yyyy HH:mm:ss');
+    return formatter.format(date);
+  }
+
   Future<void> _loadInternships() async {
     final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('login_token');
@@ -45,9 +75,7 @@ class _ListKpState extends State<ListKp> {
       final url = Uri.parse('https://backend-pmp.unand.dev/api/my-internships');
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
@@ -114,7 +142,7 @@ class _ListKpState extends State<ListKp> {
           ? const Center(child: CircularProgressIndicator())
           : profile == null
               ? const Center(child: Text('Profile data not available'))
-              : CustomList(profile: profile!, internships: internships),
+              : CustomList(profile: profile!, internships: internships, earthquakes: earthquakes),
     );
   }
 }
@@ -122,12 +150,13 @@ class _ListKpState extends State<ListKp> {
 class CustomList extends StatelessWidget {
   final Map<String, dynamic> profile;
   final List<InternshipElement> internships;
+  final List<GempaTerkini> earthquakes;
 
-  const CustomList({Key? key, required this.profile, required this.internships}) : super(key: key);
+  const CustomList({Key? key, required this.profile, required this.internships, required this.earthquakes}) : super(key: key);
 
   String _formatDate(DateTime? date) {
     if (date == null) return "N/A";
-    return "${date.day} ${_monthName(date.month)} ${date.year}";
+    return "${date.day} ${_monthName(date.month)} ${date.year} ${DateFormat('HH:mm:ss a').format(date)}";
   }
 
   String _monthName(int month) {
@@ -143,86 +172,67 @@ class CustomList extends StatelessWidget {
     return ListView(
       children: [
         Card(
-          margin: const EdgeInsets.only(top: 8.0),
-          elevation: 10.0,
+          margin: const EdgeInsets.all(8.0),
+          elevation: 5.0,
           shadowColor: Colors.black.withOpacity(0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),
-          child: Container(
-            width: double.infinity,
-            height: 150,
-            decoration: const BoxDecoration(
-              color: Color(0xFFE1E9F0),
-              image: DecorationImage(
-                image: AssetImage('images/unand.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('images/profile.jpg'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Informasi Gempa Terkini',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
                   ),
-                  const SizedBox(width: 16.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        profile['name'] ?? 'Unknown',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                          color: Color.fromARGB(255, 39, 31, 31),
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      Text(
-                        profile['nim'] ?? 'Unknown',
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        profile['department_name'] ?? 'Unknown',
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
-            ),
+              ...earthquakes.map((earthquake) => ListTile(
+                title: Text(
+                  earthquake.features[0].properties.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Lokasi: ${earthquake.features[0].properties.place}'),
+                    Text('Magnitude: ${earthquake.features[0].properties.mag.toString()}'),
+                    Text('Potensi Tsunami: ${earthquake.features[0].properties.tsunami == 1 ? 'Berpotensi' : 'Tidak berpotensi'}'),
+                    Text('Waktu: ${_formatDate(DateTime.fromMillisecondsSinceEpoch(earthquake.features[0].properties.time))}'),
+                  ],
+                ),
+              )).toList(),
+            ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.all(24.0),
-          child: const Text(
-            'List KP Yang Diikuti',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18.0,
-            ),
+        Card(
+          margin: const EdgeInsets.all(8.0),
+          elevation: 5.0,
+          shadowColor: Colors.black.withOpacity(0.3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
           ),
-        ),
-        ...internships.map((internship) => Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => EditKp(internshipId: internship.id)));
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFE1E9F0),
-                borderRadius: BorderRadius.circular(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'List KP Yang Diikuti',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
+                ),
               ),
-              child: ListTile(
+              ...internships.map((internship) => ListTile(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EditKp(internshipId: internship.id)));
+                },
                 title: Text(
                   internship.company,
                   style: const TextStyle(fontWeight: FontWeight.bold),
@@ -231,10 +241,10 @@ class CustomList extends StatelessWidget {
                 trailing: Text(
                   '${_formatDate(internship.startAt)} - ${_formatDate(internship.endAt)}',
                 ),
-              ),
-            ),
+              )).toList(),
+            ],
           ),
-        )).toList(),
+        ),
       ],
     );
   }
