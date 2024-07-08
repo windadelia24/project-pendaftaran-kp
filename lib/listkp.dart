@@ -158,6 +158,10 @@ class CustomList extends StatelessWidget {
     if (date == null) return "N/A";
     return "${date.day} ${_monthName(date.month)} ${date.year} ${DateFormat('HH:mm:ss a').format(date)}";
   }
+  String _dateFormat(DateTime? date) {
+  if (date == null) return "N/A";
+  return "${date.day} ${_monthName(date.month)} ${date.year}";
+}
 
   String _monthName(int month) {
     const monthNames = [
@@ -200,7 +204,7 @@ class CustomList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Lokasi: ${earthquake.features[0].properties.place}'),
-                    Text('Magnitude: ${earthquake.features[0].properties.mag.toString()}'),
+                    Text('Magnitude: ${earthquake.features[0].properties.mag.toStringAsFixed(1)}'),
                     Text('Potensi Tsunami: ${earthquake.features[0].properties.tsunami == 1 ? 'Berpotensi' : 'Tidak berpotensi'}'),
                     Text('Waktu: ${_formatDate(DateTime.fromMillisecondsSinceEpoch(earthquake.features[0].properties.time))}'),
                   ],
@@ -239,7 +243,7 @@ class CustomList extends StatelessWidget {
                 ),
                 subtitle: Text(internship.title ?? 'No title available'),
                 trailing: Text(
-                  '${_formatDate(internship.startAt)} - ${_formatDate(internship.endAt)}',
+                  '${_dateFormat(internship.startAt)} - ${_dateFormat(internship.endAt)}',
                 ),
               )).toList(),
             ],
